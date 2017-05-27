@@ -1,0 +1,86 @@
+    {
+        "name": {{cluster.name}},
+        "description": {{cluster.description}},
+        "vxnet": {{cluster.vxnet}},
+        "links": {
+            "hadp_service": {{cluster.hadp_service}}
+        },
+        "node": [{
+            "role": "hive-server",
+            "container": {
+               "type": "kvm",
+               "zone": "test",
+               "image": "img-ab5r0x16"
+            },
+            "count": {{cluster.hive-server.count}},
+            "cpu": {{cluster.hive-server.cpu}},
+            "memory": {{cluster.hive-server.memory}},
+            "volume": {
+                "size": {{cluster.hive-server.volume_size}},
+                "mount_point": "/data",
+                "filesystem": "ext4"
+            },
+            "instance_class": {{cluster.hive-server.instance_class}},
+            "advanced_action": ["change_vxnet", "scale_horizontal"],
+            "service": {
+                "init": {
+                    "cmd": "/usr/local/hive/hive_shell.sh init"
+                },
+                "start": {
+                    "order": 1,
+                    "cmd": "/usr/local/hive/hive_shell.sh start"
+                },
+                "stop": {
+                    "order": 2,
+                    "cmd": "/usr/local/hive/hive_shell.sh stop"
+                }
+            }
+        },
+        {
+            "role": "hive-hiveserver2", 
+            "container": {
+               "zone": "test",
+               "type": "kvm",
+               "image": "img-ab5r0x16"
+            },
+            "count": {{cluster.hive-hiveserver2.count}},
+            "cpu": {{cluster.hive-hiveserver2.cpu}},
+            "memory": {{cluster.hive-hiveserver2.memory}},
+            "volume": {
+                "size": {{cluster.hive-hiveserver2.volume_size}},
+                "mount_point": "/data",
+                "filesystem": "ext4"
+            },
+            "instance_class": {{cluster.hive-hiveserver2.instance_class}},
+            "advanced_action": ["change_vxnet", "scale_horizontal"],
+            "service": {
+                "init": {
+                    "cmd": "/usr/local/hive/hive_shell.sh init"
+                },
+                "start": {
+                    "order": 2,
+                    "cmd": "/usr/local/hive/hive_shell.sh start"
+                },
+                "stop": {
+                    "order": 1,
+                    "cmd": "/usr/local/hive/hive_shell.sh stop"
+                }
+            }
+        }],
+        "env": {
+            "database": {{env.database}}, 
+            "database_host": {{env.database_host}},
+            "database_port": {{env.database_port}},
+            "database_user": {{env.database_user}},
+            "database_password": {{env.database_password}},
+            "database_name": {{env.database_name}},
+            "QingStor": {{env.QingStor}},
+            "access_key": {{env.access_key}},
+            "secret_key": {{env.secret_key}}
+        },
+        "endpoint": {
+            "hiveserver2": {
+                "port": 10001
+            }
+        }
+    }
