@@ -1,6 +1,6 @@
 [template]
-src = "config.ini.tmpl"
-dest = "/usr/local/hive/conf/config.ini"
+src = "hive_shell.sh.tmpl"
+dest = "/usr/local/hive/hive_shell.sh"
 keys = [
     "/",
 ]

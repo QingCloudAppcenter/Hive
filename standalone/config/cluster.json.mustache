@@ -5,12 +5,12 @@
         "links": {
             "hadp_service": {{cluster.hadp_service}}
         },
-        "node": [{
+        "nodes": [{
             "role": "hive-server",
             "container": {
                "type": "kvm",
-               "zone": "test",
-               "image": "img-ab5r0x16"
+               "zone": "pek3a",
+               "image": "img-ts32tkmy"
             },
             "count": {{cluster.hive-server.count}},
             "cpu": {{cluster.hive-server.cpu}},
@@ -21,8 +21,8 @@
                 "filesystem": "ext4"
             },
             "instance_class": {{cluster.hive-server.instance_class}},
-            "advanced_action": ["change_vxnet", "scale_horizontal"],
-            "service": {
+            "advanced_actions": ["change_vxnet", "scale_horizontal"],
+            "services": {
                 "init": {
                     "cmd": "/usr/local/hive/hive_shell.sh init"
                 },
@@ -34,37 +34,16 @@
                     "order": 2,
                     "cmd": "/usr/local/hive/hive_shell.sh stop"
                 }
-            }
-        },
-        {
-            "role": "hive-hiveserver2", 
-            "container": {
-               "zone": "test",
-               "type": "kvm",
-               "image": "img-ab5r0x16"
             },
-            "count": {{cluster.hive-hiveserver2.count}},
-            "cpu": {{cluster.hive-hiveserver2.cpu}},
-            "memory": {{cluster.hive-hiveserver2.memory}},
-            "volume": {
-                "size": {{cluster.hive-hiveserver2.volume_size}},
-                "mount_point": "/data",
-                "filesystem": "ext4"
-            },
-            "instance_class": {{cluster.hive-hiveserver2.instance_class}},
-            "advanced_action": ["change_vxnet", "scale_horizontal"],
-            "service": {
-                "init": {
-                    "cmd": "/usr/local/hive/hive_shell.sh init"
-                },
-                "start": {
-                    "order": 2,
-                    "cmd": "/usr/local/hive/hive_shell.sh start"
-                },
-                "stop": {
-                    "order": 1,
-                    "cmd": "/usr/local/hive/hive_shell.sh stop"
-                }
+            "health_check": {
+                "enable": true,
+                "interval_sec": 60,
+                "timeout_sec": 10,
+                "action_timeout_sec": 30,
+                "healthy_threshold": 3,
+                "unhealthy_threshold": 3,
+                "check_cmd": "/usr/local/hive/hive_shell.sh status",
+                "action_cmd": "/usr/local/hive/hive_shell.sh start"
             }
         }],
         "env": {
@@ -78,7 +57,7 @@
             "access_key": {{env.access_key}},
             "secret_key": {{env.secret_key}}
         },
-        "endpoint": {
+        "endpoints": {
             "hiveserver2": {
                 "port": 10001
             }

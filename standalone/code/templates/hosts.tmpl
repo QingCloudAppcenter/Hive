@@ -1,13 +1,10 @@
     {{getv "/host/ip"}} localhost
     # hive hosts
-    {{range $role := lsdir "/hosts"}}
+{{range $role := lsdir "/hosts"}}
     {{range $dir := lsdir (printf "/hosts/%s" $role)}}{{$ip := getv (printf "/hosts/%s/%s/ip" $role $dir)}}
-    {{if eq (getv "/host/ip") $ip}} 
-    # role="{{$role}}"
-    {{end}} 
-    {{$ip}} {{$dir}}{{end}}
+    {{$ip}} {{$dir}}
     {{end}}
-
+{{end}}
 {{$name := "hadp_service"}}
 {{if ls (printf "/links/%s" $name)}}
     {{printf "# %s hosts" $name}}

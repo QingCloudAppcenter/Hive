@@ -51,6 +51,7 @@
 # export HIVE_CONF_DIR=
 
 # Folder containing extra ibraries required for hive compilation/execution can be controlled by:
+source /etc/profile
 {{if eq (getv "/env/QingStor") "true"}}
 export HIVE_AUX_JARS_PATH=$HADOOP_S3
 {{else}}
