@@ -7,58 +7,33 @@ MYSQL_DATA=/data/mysql
 CONF_DIR=$HIVE_HOME/conf
 LOG_DIR=/data/hive/logs
 
-role="none"
-str=`cat /etc/hosts|grep "^\s*# role"`
-str=${str/"#"/""}
-eval $str
-server_name_str=(
-"database"
-"hiveserver2"
-)
-section_str=(
-"^\[database\]"
-"^\[hive\]"
-)
-for((index=0;index<${#server_name_str[*]};index++));do 
-    server_name=${server_name_str[$index]}
-    section=${section_str[$index]}
-    eval ${server_name}_server=0
-    if egrep $section $CONF_DIR/config.ini -A 50 | grep "^\s*# ${server_name}_server_local" >& /dev/null;then
-        eval ${server_name}_server=1
-        if egrep $section $CONF_DIR/config.ini -A 50 | grep "^\s*# ${server_name}_server_local=true" >& /dev/null;then
-            eval ${server_name}_server_local=1
-        else
-            eval ${server_name}_server_local=0
-        fi
-    fi
-done
+{{if eq (getv "/env/database") "remote"}}
+database_server_local=0
+{{else}}
+database_server_local=1
+{{end}}
 
 init_database() {
-    if [ $database_server -eq 1 ];then 
-        if [ $role = "hive-server" -a $database_server_local -eq 1 ];then
-            if [ -e "$MYSQL_DATA" ]; then
-                rm -rf $MYSQL_DATA
-            fi
-            tar -zxf /usr/local/mysql/mysql.tgz -C /data
-            mv /data/data $MYSQL_DATA
-            chown -R ubuntu:ubuntu $MYSQL_DATA
+    if [ $database_server_local -eq 1 ];then
+        if [ -e "$MYSQL_DATA" ]; then
+            rm -rf $MYSQL_DATA
         fi
+        tar -zxf /usr/local/mysql/mysql.tgz -C /data
+        mv /data/data $MYSQL_DATA
+        chown -R ubuntu:ubuntu $MYSQL_DATA
     fi
 }
 start_database() {
-    if [ $database_server -eq 1 ];then 
-        if [ $role = "hive-server" -a $database_server_local -eq 1 ];then
-            if test -r $MYSQL_DATA/`hostname`.pid;then
-                #echo "exit!"
-	            return 0
-            else
-                sudo -u ubuntu service mysql.server start >& /dev/null
-                run=$?
-                if [ $run -ne 0 ];then
-                    exit $run
-                fi
+    if [ $database_server_local -eq 1 ];then
+        if test -r $MYSQL_DATA/`hostname`.pid;then
+	        return 0
+        else
+            sudo -u ubuntu service mysql.server start >& /dev/null
+            run=$?
+            if [ $run -ne 0 ];then
+                echo "start database error!"
             fi
-#            ps aux|grep mysql   
+            return $run
         fi
     fi
 }
@@ -67,10 +42,21 @@ stop_database() {
         sudo -u ubuntu service mysql.server stop >& /dev/null
         run=$?
         if [ $run -ne 0 ];then
-            exit $run
+            echo "stop database error!"
         fi
+        return $run
     else
 	    return 0
+    fi
+}
+status_database(){
+    if [ $database_server_local -eq 1 ];then
+        if test -r $MYSQL_DATA/`hostname`.pid;then
+	        return 0
+        else
+            echo "database status error!"
+            return 1
+        fi
     fi
 }
 start_daemon(){
@@ -144,45 +130,75 @@ stop_daemon(){
         #exit 1
     fi    
 }
-start_hiveserver2() {
-    if [ $hiveserver2_server -eq 1 ];then 
-        if [ $role = "hive-server" -a $hiveserver2_server_local -eq 1 ]||[ $role = "hive-hiveserver2" -a $hiveserver2_server_local -eq 0 ];then
-            start_daemon hiveserver2 "hive --service hiveserver2"
-        fi
+status_daemon(){
+    name=$1
+    PID="$LOG_DIR/${name}.pid"
+    if test -r $PID;then
+        echo "$name running. pid=`cat $PID`"
+        return 0
+    else
+        echo "$name not running."
+        return 1
     fi
 }
-stop_hiveserver2() {
-    stop_daemon hiveserver2
-}
-
 init_hive() {
     mkdir -p $LOG_DIR
 }
 start_hive() {
-    if [ $role = "hive-server" -a $hiveserver2_server_local -eq 0 ];then
-        start_daemon metastore "hive --service metastore -p 9083"
-    fi
+    start_daemon metastore "hive --service metastore -p 9083"
+    return $?
 }
 stop_hive() {
-    if [ $role = "hive-server" ];then
-        stop_daemon metastore
-    fi 
+    stop_daemon metastore
+    return $?
+}
+status_hive(){
+    status_daemon metastore
+    return $?
 }
 stop() {
     echo "Stoping hive... "
     stop_hive
-    stop_hiveserver2
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
+    echo "Stoping database... "
     stop_database
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
 }
 start() {
+    echo "Starting database... "
     start_database
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     echo "Starting hive... "
     start_hive
-    start_hiveserver2 
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
+}
+status() {
+    status_hive
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
+    status_database
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
 }
 init() {
     init_database
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     init_hive
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
 }
 case "$1" in
     start)
@@ -197,6 +213,9 @@ case "$1" in
 	;;
     init)
     init
+    ;;
+    status)
+    status
     ;;
     *)
 	echo $"Usage: $ {start|stop|restart|status|init}"

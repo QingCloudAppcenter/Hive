@@ -1,0 +1,234 @@
+{
+    "type": "array",
+    "properties": [{
+        "key": "cluster",
+        "description": "Hive Service",
+        "type": "array",
+        "properties": [{
+            "key": "name",
+            "label": "name",
+            "description": "The name of the Hive service",
+            "type": "string",
+            "default": "",
+            "required": "no"
+        },
+        {
+            "key": "description",
+            "label": "description",
+            "description": "The description of the Hive service",
+            "type": "string",
+            "default": "",
+            "required": "no"
+        },
+        {
+            "key": "vxnet",
+            "label": "VxNet",
+            "description": "Choose a vxnet to join",
+            "type": "string",
+            "default": "",
+            "required": "yes"
+        },
+        {
+            "key": "hadp_service",
+            "label": "Hadoop",
+            "description": "Choose a Hadoop to use",
+            "type": "service",
+            "tag": ["Hadoop"],
+            "default": "",
+            "required": "yes"
+        },
+        {
+            "key": "zk_service",
+            "label": "Zookeeper",
+            "description": "Choose a Zookeeper to use",
+            "type": "service",
+            "tag": ["Zookeeper"],
+            "default": "",
+            "required": "yes"
+        },
+        {
+            "key": "metastore",
+            "description": "metastore service properties",
+            "label": "metastore",
+            "type": "array",
+            "properties": [{
+                "key": "count",
+                "label": "count",
+                "description": "Number of nodes for the cluster to create",
+                "type": "integer",
+                "default": 1,
+                "range":[1],
+                "required": "yes"
+            },
+            {
+                "key": "cpu",
+                "label": "CPU",
+                "description": "CPUs of each node",
+                "type": "integer",
+                "default": 2,
+                "range": [1,2,4,8,12,16],
+                "required": "yes"
+            },
+            {
+                "key": "memory",
+                "label": "Memory",
+                "description": "memory of each node (in MB)",
+                "type": "integer",
+                "default": 4096,
+                "range": [1024,2048,4096,8192,16384,32768],
+                "required": "yes"
+            },
+            {
+                "key": "instance_class",
+                "label": "instance class",
+                "description":"The instance type for the cluster to run, such as high performance, high performance plus",
+                "type":"integer",
+                "default":0,
+                "range": [0,1],
+                "required":"yes"
+            },
+            {
+                "key": "volume_size",
+                "label": "volume size",
+                "description":"The volume size for each instance",
+                "type":"integer",
+                "default":10,
+                "min": 10,
+                "max": 1000,
+                "step": 10,
+                "required":"yes"
+            }]
+        },
+        {
+            "key": "hiveserver2",
+            "description": "hiveserver2 service properties",
+            "label": "hiveserver2",
+            "type": "array",
+            "properties": [{
+                "key": "count",
+                "label": "count",
+                "description": "Number of nodes for the cluster to create",
+                "type": "integer",
+                "default": 1,
+                "required": "yes"
+            },
+            {
+                "key": "cpu",
+                "label": "CPU",
+                "description": "CPUs of each node",
+                "type": "integer",
+                "default": 2,
+                "range": [1,2,4,8,12,16],
+                "required": "yes"
+            },
+            {
+                "key": "memory",
+                "label": "Memory",
+                "description": "memory of each node (in MB)",
+                "type": "integer",
+                "default": 4096,
+                "range": [1024,2048,4096,8192,16384,32768],
+                "required": "yes"
+            },
+            {
+                "key": "instance_class",
+                "label": "instance class",
+                "description":"The instance type for the cluster to run, such as high performance, high performance plus",
+                "type":"integer",
+                "default":0,
+                "range": [0,1],
+                "required":"yes"
+            },
+            {
+                "key": "volume_size",
+                "label": "volume size",
+                "description":"The volume size for each instance",
+                "type":"integer",
+                "default":10,
+                "min": 10,
+                "max": 1000,
+                "step": 10,
+                "required":"yes"
+            }]
+        }]
+    },
+    {
+        "key": "env",
+        "description": "Hive service properties",
+        "type": "array",
+        "properties": [{
+            "key": "database",
+            "label": "database",
+            "description": "The Hive MetaStore Database",
+            "type": "string",
+            "default": "local",
+            "range": ["local", "remote"],
+            "required":"yes"
+        },
+        {
+            "key": "database_name",
+            "label": "database_name",
+            "description": "The Hive MetaStore Database Name",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "database_host",
+            "label": "database_host",
+            "description": "The Hive MetaStore Database Host",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "database_port",
+            "label": "database_port",
+            "description": "The Hive MetaStore Database Port",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "database_user",
+            "label": "database_user",
+            "description": "The Hive MetaStore Database User",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "database_password",
+            "label": "database_password",
+            "description": "The Hive MetaStore Database Password",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "QingStor",
+            "label": "QingStor",
+            "description": "Whether to use QingStor",
+            "type": "boolean",
+            "default": false,
+            "range": [true,false],
+            "required":"yes"
+        },
+        {
+            "key": "access_key",
+            "label": "access_key",
+            "description": "The QingStor access_key",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "secret_key",
+            "label": "secret_key",
+            "description": "The QingStor secret_key",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        }]
+    }]
+}

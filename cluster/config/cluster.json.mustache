@@ -1,0 +1,107 @@
+    {
+        "name": {{cluster.name}},
+        "description": {{cluster.description}},
+        "vxnet": {{cluster.vxnet}},
+        "links": {
+            "hadp_service": {{cluster.hadp_service}},
+            "zk_service": {{cluster.zk_service}}
+        },
+        "nodes": [{
+            "role": "hiveserver2",
+            "container": {
+               "type": "kvm",
+               "zone": "pek3a",
+               "image": "img-d9lymi3k"
+            },
+            "count": {{cluster.hiveserver2.count}},
+            "cpu": {{cluster.hiveserver2.cpu}},
+            "memory": {{cluster.hiveserver2.memory}},
+            "volume": {
+                "size": {{cluster.hiveserver2.volume_size}},
+                "mount_point": "/data",
+                "filesystem": "ext4"
+            },
+            "instance_class": {{cluster.hiveserver2.instance_class}},
+            "advanced_actions": ["change_vxnet", "scale_horizontal"],
+            "services": {
+                "init": {
+                    "cmd": "/usr/local/hive/hiveserver2.sh init"
+                },
+                "start": {
+                    "order": 2,
+                    "cmd": "/usr/local/hive/hiveserver2.sh start"
+                },
+                "stop": {
+                    "order": 1,
+                    "cmd": "/usr/local/hive/hiveserver2.sh stop"
+                }
+            },
+            "health_check": {
+                "enable": true,
+                "interval_sec": 60,
+                "timeout_sec": 10,
+                "action_timeout_sec": 30,
+                "healthy_threshold": 3,
+                "unhealthy_threshold": 3,
+                "check_cmd": "/usr/local/hive/hiveserver2.sh status",
+                "action_cmd": "/usr/local/hive/hiveserver2.sh start"
+            }
+        },
+        {
+            "role": "metastore",
+            "container": {
+               "type": "kvm",
+               "zone": "pek3a",
+               "image": "img-1umixg0d"
+            },
+            "count": {{cluster.metastore.count}},
+            "cpu": {{cluster.metastore.cpu}},
+            "memory": {{cluster.metastore.memory}},
+            "volume": {
+                "size": {{cluster.metastore.volume_size}},
+                "mount_point": "/data",
+                "filesystem": "ext4"
+            },
+            "instance_class": {{cluster.metastore.instance_class}},
+            "advanced_actions": ["change_vxnet", "scale_horizontal"],
+            "services": {
+                "init": {
+                    "cmd": "/usr/local/hive/hive_shell.sh init"
+                },
+                "start": {
+                    "order": 1,
+                    "cmd": "/usr/local/hive/hive_shell.sh start"
+                },
+                "stop": {
+                    "order": 2,
+                    "cmd": "/usr/local/hive/hive_shell.sh stop"
+                }
+            },
+            "health_check": {
+                "enable": true,
+                "interval_sec": 60,
+                "timeout_sec": 10,
+                "action_timeout_sec": 30,
+                "healthy_threshold": 3,
+                "unhealthy_threshold": 3,
+                "check_cmd": "/usr/local/hive/hive_shell.sh status",
+                "action_cmd": "/usr/local/hive/hive_shell.sh start"
+            }
+        }],
+        "env": {
+            "database": {{env.database}}, 
+            "database_host": {{env.database_host}},
+            "database_port": {{env.database_port}},
+            "database_user": {{env.database_user}},
+            "database_password": {{env.database_password}},
+            "database_name": {{env.database_name}},
+            "QingStor": {{env.QingStor}},
+            "access_key": {{env.access_key}},
+            "secret_key": {{env.secret_key}}
+        },
+        "endpoints": {
+            "hiveserver2": {
+                "port": 10001
+            }
+        }
+    }

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/user/hive/warehouse</value>
+        <description>location of default database for the warehouse</description>
+    </property>
+    <property>
+    {{range $host := lsdir "/hosts/metastore"}}{{$host_ip := getv (printf "/hosts/metastore/%s/ip" $host)}}
+	    <name>hive.metastore.uris</name>
+	    <value>thrift://{{$host_ip}}:9083</value>
+    {{end}}
+    </property>
+    <property>
+        <name>hive.server2.support.dynamic.service.discovery</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>hive.server2.zookeeper.namespace</name>
+        <value>hive_{{getv "/cluster/cluster_id"}}</value>
+    </property>
+    {{$port := getv "/links/zk_service/cluster/endpoints/zookeeper/port" "2181"}}
+    <property>
+        <name>hive.zookeeper.quorum</name>
+        <value>{{range $i, $host := ls "/links/zk_service/hosts"}}{{$ip := printf "/links/zk_service/hosts/%s/ip" $host}}{{if $i}},{{end}}{{getv $ip}}:{{$port}}{{end}}</value>
+    </property>
+    <property>
+        <name>hive.zookeeper.client.port</name>
+        <value>{{$port}}</value>
+    </property>
+    <property>
+        <name>hive.server2.thrift.bind.host</name>
+        <value>{{getv "/host/ip"}}</value>
+    </property>
+    <property>
+        <name>hive.server2.thrift.port</name>
+        <value>10001</value>
+    </property>
+</configuration>
