@@ -10,7 +10,7 @@
             "container": {
                "type": "kvm",
                "zone": "pek3a",
-               "image": "img-ts32tkmy"
+               "image": "img-ot5ckkp9"
             },
             "count": {{cluster.hive-server.count}},
             "cpu": {{cluster.hive-server.cpu}},
@@ -60,6 +60,9 @@
         "endpoints": {
             "hiveserver2": {
                 "port": 10001
+            },
+            "metastore": {
+                "port": 9083
             }
         }
     }
